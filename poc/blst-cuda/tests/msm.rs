@@ -105,11 +105,19 @@ fn mymsm_correctness(){
         758980840597131341
     ]));
 
-    println!("s: {:?}", s);
+    // println!("s: {:?}", s);
     let scalars = [s].to_vec();
     println!("scalars: {:?}", scalars);
 
     // let mymsm_result = mymsm_scalar_mult();
+
+    let arkworks_result =
+    VariableBaseMSM::multi_scalar_mul(points.as_slice(), unsafe {
+        std::mem::transmute::<&[_], &[BigInteger256]>(scalars.as_slice())
+    })
+    .into_affine();
+
+    println!("\r\narkworks_result: {:?}", arkworks_result);
 
     // println!("mymsm_result: {}", mymsm_result);
 
