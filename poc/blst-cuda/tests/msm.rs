@@ -119,7 +119,12 @@ fn mymsm_correctness(){
 
     println!("\r\narkworks_result: {:?}", arkworks_result);
 
-    // println!("mymsm_result: {}", mymsm_result);
+    let mymsm_result = mymsm_scalar_mult_works(points.as_slice(),unsafe{
+        std::mem::transmute::<&[_], &[BigInteger256]>(scalars.as_slice())
+    })
+    .into_affine();
+
+    println!("\r\nmymsm_result: {}", 0);
 
     assert_eq!(1,1);
 }

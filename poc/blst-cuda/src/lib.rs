@@ -94,6 +94,7 @@ pub fn mymsm_scalar_mult_works<G: AffineCurve>(
     if npoints != scalars.len() {
         panic!("length mismatch");
     }
+    println!("npoints: {}", npoints);
 
     let mut ret = G::Projective::zero();
     let err = unsafe {
