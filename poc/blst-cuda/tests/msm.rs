@@ -37,3 +37,14 @@ fn msm_correctness() {
 
     assert_eq!(msm_result, arkworks_result);
 }
+
+#[test]
+fn mymsm_correctness(){
+    println!("mymsm_correctness()");
+
+    // let mymsm_result = mymsm_scalar_mult();
+
+    // println!("mymsm_result: {}", mymsm_result);
+
+    assert_eq!(1,1);
+}

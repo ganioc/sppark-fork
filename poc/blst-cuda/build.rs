@@ -116,6 +116,8 @@ fn main() {
             nvcc.include(include);
         }
         nvcc.file("cuda/pippenger_inf.cu").compile("blst_cuda_msm");
+        nvcc.file("cuda/mymsm_cuda.cu").compile("blst_cuda_msm");
+        
 
         println!("cargo:rustc-cfg=feature=\"cuda\"");
         println!("cargo:rerun-if-changed=cuda");
