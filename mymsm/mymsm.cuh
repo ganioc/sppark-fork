@@ -39,6 +39,7 @@ RustError invoke(
     // bucket methods
     bucket_t *d_buckets; // [NWINS][1<<WBITS];
     affine_t *d_points;
+    scalar_t *d_scalars;
 
     size_t blob_sz = sizeof(d_buckets[0]);
     printf("blob_sz: %ld\n", blob_sz);
@@ -53,6 +54,9 @@ RustError invoke(
     cudaMalloc( &d_buckets, sizeof(bucket_t) * NWINS * (1<<WBITS));
     // d_points = 
     cudaMalloc( &d_points, sizeof(affine_t) * npoints);
+    cudaMalloc( &d_scalars, sizeof(scalar_t) * npoints);
+
+    
 
     msm_kernel<<<2,2>>>();
     cudaDeviceSynchronize();
@@ -60,7 +64,8 @@ RustError invoke(
     // 释放内存
     cudaFree( d_buckets);
     cudaFree( d_points );
-    
+    cudaFree( d_scalars);
+
     return RustError{cudaSuccess};
 }
 RustError invoke(
