@@ -12,6 +12,11 @@
 
 #include <stdio.h>
 
+__global__ void msm_kernel(void){
+    printf("hello from thread [%d,%d] from device.\n",
+            threadIdx.x, blockIdx.x);
+}
+
 RustError invoke(
     point_t&         out,
     const affine_t*  points_,
@@ -23,6 +28,8 @@ RustError invoke(
     printf("invoke()\n");
     printf("npoints: %ld\n", npoints);
 
+    msm_kernel<<<2,2>>>();
+    cudaDeviceSynchronize();
 
     return RustError{cudaSuccess};
 }
