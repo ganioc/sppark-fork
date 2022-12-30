@@ -17,9 +17,12 @@
 #define WBITS     11 // Suitable for ~2^16
 #define NWINS     23
 
-__global__ void msm_kernel(void){
+__global__ void msm_kernel(bucket_t *d_buckets,affine_t *d_points,scalar_t *d_scalars ){
     printf("hello from thread [%d,%d] from device.\n",
             threadIdx.x, blockIdx.x);
+    if(threadIdx.x == 0){
+        
+    }
 }
 
 cudaDeviceProp prop;
@@ -56,15 +59,20 @@ RustError invoke(
     cudaMalloc( &d_points, sizeof(affine_t) * npoints);
     cudaMalloc( &d_scalars, sizeof(scalar_t) * npoints);
 
-    
+    cudaMemcpy( d_points, points_,sizeof(affine_t) * npoints , cudaMemcpyHostToDevice);
+    cudaMemcpy(d_scalars, scalars ,sizeof(scalar_t) * npoints , cudaMemcpyHostToDevice);
 
-    msm_kernel<<<2,2>>>();
+    msm_kernel<<<1,NWINS>>>(d_buckets, d_points, d_scalars);
     cudaDeviceSynchronize();
 
     // 释放内存
     cudaFree( d_buckets);
     cudaFree( d_points );
     cudaFree( d_scalars);
+
+    // 这些API都是用在GPU上运行的,
+    // out.inf();
+    // out.add(points_[0]);
 
     return RustError{cudaSuccess};
 }
