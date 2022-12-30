@@ -51,6 +51,7 @@ void pippenger(const affine_t* points, size_t npoints,
 #include <cooperative_groups.h>
 
 // Transposed scalar_t
+// val[8][32] ? 这是什么意思呢？
 class scalar_T {
     uint32_t val[sizeof(scalar_t)/sizeof(uint32_t)][WARP_SZ];
 

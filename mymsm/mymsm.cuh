@@ -98,6 +98,7 @@ static RustError mymsm_pippenger(
     }
     N = (32*256) / (NTHREADS*NWINS);
     printf("N :%ld\n", N); // N is 1,
+    printf("sizeof size_t:%ld\n", sizeof(size_t));
 
 
     return invoke(*out, 
