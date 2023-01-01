@@ -20,9 +20,24 @@
 __global__ void msm_kernel(bucket_t *d_buckets,affine_t *d_points,scalar_t *d_scalars ){
     printf("hello from thread [%d,%d] from device.\n",
             threadIdx.x, blockIdx.x);
-    if(threadIdx.x == 0){
+    // if(threadIdx.x == 0){
         
-    }
+    // }
+    int idx = threadIdx.x % NWINS;
+    int group_idx = threadIdx.x / NWINS;
+    // bucket_t* bucket_row = d_bucket + group_idx * (1 << WBITS);
+    // scalar_t *scalar = d_scalars[group_idx];
+    // affine_t *point  = d_points[group_idx];
+
+    printf("idx %d\n", idx);
+    printf("group_idx %d\n", group_idx);
+    scalar_t scalar = d_scalars[group_idx];
+    affine_t point  = d_points[group_idx];
+    // scalar_t 如何转换成长整数呢?
+    // int row_idx = (scalar >> (idx * WBITS)) & (0U - 1<<WBITS)
+    // bucket_t bucket = *(d_bucket + group_idx *(1<< WBITS) + row_idx);
+
+
 }
 
 cudaDeviceProp prop;
