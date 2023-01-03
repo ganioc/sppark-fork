@@ -95,13 +95,29 @@ fn mymsm_correctness() {
 
     // let mut s = <G1Affine as AffineCurve>::ScalarField::rand(&mut rng);
     // println!("s: {:?}", s);
-
-    let s = Fr::new(BigInteger256([
+    let bg1 = BigInteger256([
         16607241952120894801,
         8902715486184888151,
         15432806594273149183,
         758980840597131341,
-    ]));
+    ]);
+
+    let s = Fr::new(bg1);
+
+    // print out the 0xXX content,
+    // 1: 0xE678C69107217551
+    // 2: 0x7B8CCC90EA6B5757
+    // 3: 0xD62C57D4BAF500FF
+    // 4: 0xA88710DA31E904D
+    let a1: u64 = 16607241952120894801;
+    let a2: u64 = 8902715486184888151;
+    let a3: u64 = 15432806594273149183;
+    let a4: u64 = 758980840597131341;
+
+    println!("1: {:#X}", a1);
+    println!("2: {:#X}", a2);
+    println!("3: {:#X}", a3);
+    println!("4: {:#X}", a4);
 
     // println!("s: {:?}", s);
     let scalars = [s].to_vec();
