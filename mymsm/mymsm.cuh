@@ -17,7 +17,8 @@
 #define WBITS     11 // Suitable for ~2^16
 #define NWINS     23
 
-/**
+/* 
+ * off, index of bits(11), 0~22,
  */
 template<class scalar_t>
 static __device__ int get_wval(const scalar_t& d, uint32_t off, uint32_t bits)
@@ -68,8 +69,14 @@ __global__ void msm_kernel(bucket_t *d_buckets,affine_t *d_points,scalar_t *d_sc
     int wval = -1;
     wval = get_wval(scalar, idx, 11);
     printf("%d wval %0x\n", idx, wval);
-
-
+    
+    // clear all buckets to be zero,
+    for(int i =0; i < (1 << WBITS); i++){
+        bucket_t bucket = *(d_buckets + idx * (1 << WBITS) + i);
+        bucket.inf();
+    }
+    bucket_t bucket = *(d_buckets + idx * (1 << WBITS) + wval);
+    bucket.add(point);
 
 }
 
