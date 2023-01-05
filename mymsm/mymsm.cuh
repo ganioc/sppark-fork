@@ -78,6 +78,9 @@ __global__ void msm_kernel(bucket_t *d_buckets,affine_t *d_points,scalar_t *d_sc
     bucket_t bucket = *(d_buckets + idx * (1 << WBITS) + wval);
     bucket.add(point);
 
+    // combine the row,
+    
+
 }
 
 cudaDeviceProp prop;
@@ -174,6 +177,13 @@ static RustError mymsm_pippenger(
     // return RustError{cudaSuccess};
 }
 
+
+static RustError mymsm_polynomial(size_t degree){
+    printf("mymsm_polynomial()\r\n");
+    printf("Start GPU computation\n");
+
+    return RustError{cudaSuccess};
+}
 
 #endif
 

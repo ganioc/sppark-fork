@@ -41,6 +41,8 @@ extern "C" {
         scalars: *const Fr,
         ffi_affine_sz: usize,
     )-> cuda::Error;
+
+    fn mymsm_polynomial_inf(degree: usize) -> cuda::Error;
 }
 
 pub fn multi_scalar_mult(
@@ -112,3 +114,17 @@ pub fn mymsm_scalar_mult_works<G: AffineCurve>(
 
     ret
 }
+
+pub fn mymsm_polynomial_works(degree:usize){
+    println!("mymsm_polynomial_works()");
+
+    let err = unsafe{
+        mymsm_polynomial_inf(degree)
+    };
+    if err.code != 0 {
+        panic!("{}", String::from(err));
+    }
+
+    ()
+}
+

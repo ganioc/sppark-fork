@@ -28,6 +28,10 @@ extern "C" {
         return mymsm_pippenger<bucket_t>(out, points, npoints, scalars, false, ffi_affine_sz);
     }
 
+    RustError mymsm_polynomial_inf(size_t degree){
+        return mymsm_polynomial(degree);
+    }
+
 }
 
 

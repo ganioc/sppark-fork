@@ -143,3 +143,14 @@ fn mymsm_correctness() {
 
     assert_eq!(1, 1);
 }
+
+#[test]
+fn test_polynomial(){
+    println!("test_polynomial()");
+
+    let degree = 2;
+
+    mymsm_polynomial_works(degree);
+
+    assert_eq!(1,1);
+}
