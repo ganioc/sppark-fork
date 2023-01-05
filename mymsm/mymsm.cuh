@@ -178,12 +178,6 @@ static RustError mymsm_pippenger(
 }
 
 
-static RustError mymsm_polynomial(size_t degree){
-    printf("mymsm_polynomial()\r\n");
-    printf("Start GPU computation\n");
-
-    return RustError{cudaSuccess};
-}
 
 #endif
 

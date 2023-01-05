@@ -15,6 +15,8 @@ typedef bucket_t::affine_inf_t affine_t;
 typedef fr_t scalar_t;
 
 #include <mymsm/mymsm.cuh>
+#include <mymsm/polynomial.cuh>
+
 
 #ifndef __CUDA_ARCH__
 extern "C" {
