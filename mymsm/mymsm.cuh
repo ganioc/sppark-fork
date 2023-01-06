@@ -85,7 +85,7 @@ __global__ void msm_kernel(bucket_t *d_buckets,affine_t *d_points,scalar_t *d_sc
     // combine the row,
     __syncthreads();
 
-    bucket = *(d_buckets + 0);
+    bucket = *(d_buckets + idx * (1 << WBITS) + 0);
     for(int i=1; i< (1 << WBITS); i++){
         for(int j=i;j<(1<< WBITS); j++){
             bucket_t bucket_tmp = *(d_buckets + idx * (1 << WBITS) + j);
@@ -97,6 +97,9 @@ __global__ void msm_kernel(bucket_t *d_buckets,affine_t *d_points,scalar_t *d_sc
 
     __syncthreads();
     // combine the buckets,
+    if( idx == 0){
+        
+    }
     
 
 }

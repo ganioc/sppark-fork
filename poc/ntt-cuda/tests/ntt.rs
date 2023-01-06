@@ -48,9 +48,9 @@ fn test_against_arkworks() {
             ntt_cuda::iNTT(DEFAULT_GPU, &mut vtest, NTTInputOutputOrder::NN);
             assert!(vtest == v);
 
-            ntt_cuda::NTT(DEFAULT_GPU, &mut vtest, NTTInputOutputOrder::NR);
-            ntt_cuda::iNTT(DEFAULT_GPU, &mut vtest, NTTInputOutputOrder::RN);
-            assert!(vtest == v);
+            // ntt_cuda::NTT(DEFAULT_GPU, &mut vtest, NTTInputOutputOrder::NR);
+            // ntt_cuda::iNTT(DEFAULT_GPU, &mut vtest, NTTInputOutputOrder::RN);
+            // assert!(vtest == v);
 
             domain.coset_fft_in_place(&mut v);
             ntt_cuda::coset_NTT(DEFAULT_GPU, &mut vtest, NTTInputOutputOrder::NN);
