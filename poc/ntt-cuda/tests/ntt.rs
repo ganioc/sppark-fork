@@ -4,6 +4,8 @@
 
 use ntt_cuda::NTTInputOutputOrder;
 
+use blake2::Digest;
+
 const DEFAULT_GPU: usize = 0;
 
 #[cfg(any(feature = "bls12_377", feature = "bls12_381"))]
@@ -65,4 +67,18 @@ fn test_against_arkworks() {
     let rng = &mut test_rng();
 
     test_ntt::<Fr, Fr, _, GeneralEvaluationDomain<Fr>>(rng);
+}
+#[test]
+fn test_blake2(){
+    println!("test_blake2()");
+
+    let hash1 = blake2::Blake2s256::digest("");
+
+    println!("hash1 Blake2s256 : {:#X}", hash1);
+
+    let hash2 = blake2::Blake2b512::digest("");
+
+    println!("hash2 Blake2b512 : {:#X}", hash2);
+
+    assert_eq!(1,1);
 }
