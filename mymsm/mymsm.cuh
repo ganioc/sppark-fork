@@ -79,7 +79,7 @@ __global__ void msm_kernel(bucket_t *d_buckets,affine_t *d_points,scalar_t *d_sc
     bucket.add(point);
 
     // combine the row,
-    bucket_t bucket = *(d_buckets + idx * (1 << WBITS) + wval);
+    bucket = *(d_buckets + idx * (1 << WBITS) + wval);
     bucket.add(point);
 
     // combine the row,
@@ -89,7 +89,7 @@ __global__ void msm_kernel(bucket_t *d_buckets,affine_t *d_points,scalar_t *d_sc
     for(int i=1; i< (1 << WBITS); i++){
         for(int j=i;j<(1<< WBITS); j++){
             bucket_t bucket_tmp = *(d_buckets + idx * (1 << WBITS) + j);
-            if(bucket_tmp.is_inf() == False){
+            if(bucket_tmp.is_inf() == 0){
                 bucket.add(bucket_tmp);
             }
         }

@@ -5,6 +5,7 @@
 use ntt_cuda::NTTInputOutputOrder;
 
 use blake2::Digest;
+use hex_literal::hex;
 
 const DEFAULT_GPU: usize = 0;
 
@@ -16,9 +17,7 @@ fn test_against_arkworks() {
     #[cfg(feature = "bls12_381")]
     use ark_bls12_381::Fr;
     use ark_ff::{PrimeField, UniformRand};
-    use ark_poly::{
-        domain::DomainCoeff, EvaluationDomain, GeneralEvaluationDomain,
-    };
+    use ark_poly::{domain::DomainCoeff, EvaluationDomain, GeneralEvaluationDomain};
     use ark_std::test_rng;
 
     fn test_ntt<
@@ -69,7 +68,7 @@ fn test_against_arkworks() {
     test_ntt::<Fr, Fr, _, GeneralEvaluationDomain<Fr>>(rng);
 }
 #[test]
-fn test_blake2(){
+fn test_blake2() {
     println!("test_blake2()");
 
     let hash1 = blake2::Blake2s256::digest("");
@@ -80,5 +79,9 @@ fn test_blake2(){
 
     println!("hash2 Blake2b512 : {:#X}", hash2);
 
-    assert_eq!(1,1);
+    let hash3 = blake2::Blake2b512::digest(hex!("1122"));
+
+    println!("hash3 Blake2b512 : {:#X}", hash3);
+
+    assert_eq!(1, 1);
 }
