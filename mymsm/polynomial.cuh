@@ -14,13 +14,14 @@
 #include "./blake2b.cuh"
 
 
-__global__ void polynomial_kernel(uint16_t blake2_idx, uint8_t* in, uint16_t in_len,  uint8_t *out){
+__global__ void polynomial_kernel(uint16_t blake2_idx, uint8_t* in, uint16_t in_len,  uint8_t *out, scalar_t *scalars){
     printf("hello from thread [%d,%d] from device.\n",
             threadIdx.x, blockIdx.x);
     uint16_t idx =  threadIdx.x + blockIdx.x * blockDim.x;
     uint16_t counter =  idx + blake2_idx;
     uint8_t *buf = (uint8_t *)malloc(in_len + 4);
     uint8_t *out_buf = out + idx * BLAKE2B_OUTBYTES;
+    scalar_t *scalar = scalars + idx;
 
     for(int i=0; i< in_len; i++){
         buf[i] = in[i];
@@ -40,6 +41,10 @@ __global__ void polynomial_kernel(uint16_t blake2_idx, uint8_t* in, uint16_t in_
 
     free(buf);
 
+    // hash out is in out_buf, 64 bytes [],
+
+
+
     __syncthreads();
 
     printf("%4d: %d\n", idx, rtn);
@@ -58,10 +63,12 @@ RustError polynomial_invoke(size_t degree){
     };
     uint16_t hash_in_len = 32;
     uint8_t * d_hash_in;
+    scalar_t * d_scalars;
 
     cudaMallocHost(&data , BLAKE2B_OUTBYTES * 16);
     cudaMalloc(&d_data , BLAKE2B_OUTBYTES * 16);
     cudaMalloc(&d_hash_in, 32);
+    cudaMalloc(&d_scalars , sizeof(scalar_t) * 16);
 
     for(int i =0; i< hash_in_len; i++){
         printf("%02x ", hash_in[i]);
@@ -70,7 +77,7 @@ RustError polynomial_invoke(size_t degree){
 
     cudaMemcpy(d_hash_in, hash_in, 32, cudaMemcpyHostToDevice);
 
-    polynomial_kernel<<<1,16>>>(0, d_hash_in, hash_in_len ,d_data);
+    polynomial_kernel<<<1,16>>>(0, d_hash_in, hash_in_len ,d_data, d_scalars);
 
     cudaMemcpy(data , d_data, BLAKE2B_OUTBYTES * 16, cudaMemcpyDeviceToHost);
 
@@ -85,6 +92,8 @@ RustError polynomial_invoke(size_t degree){
 
 
     cudaFree( d_data);
+    cudaFree( d_hash_in);
+    cudaFree( d_scalars);
     cudaFreeHost( data);
 
     return RustError{cudaSuccess};
