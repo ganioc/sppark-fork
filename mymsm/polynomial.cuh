@@ -14,20 +14,31 @@
 #include "./blake2b.cuh"
 
 
-__global__ void polynomial_kernel(uint16_t blake2_idx, uint8_t *out){
+__global__ void polynomial_kernel(uint16_t blake2_idx, uint8_t* in, uint16_t in_len,  uint8_t *out){
     printf("hello from thread [%d,%d] from device.\n",
             threadIdx.x, blockIdx.x);
     uint16_t idx =  threadIdx.x + blockIdx.x * blockDim.x;
     uint16_t counter =  idx + blake2_idx;
-    uint8_t buf[4];
-    uint8_t *out_buf = out + idx * 64;
+    uint8_t *buf = (uint8_t *)malloc(in_len + 4);
+    uint8_t *out_buf = out + idx * BLAKE2B_OUTBYTES;
+
+    for(int i=0; i< in_len; i++){
+        buf[i] = in[i];
+    }
     // little endian
-    buf[3] = counter >> 24 & 0xFF;
-    buf[2] = counter >> 16 & 0xFF;
-    buf[1] = counter >> 8 & 0xFF;
-    buf[0] = counter & 0xFF;
+    buf[in_len + 3] = counter >> 24 & 0xFF;
+    buf[in_len + 2] = counter >> 16 & 0xFF;
+    buf[in_len + 1] = counter >> 8 & 0xFF;
+    buf[in_len + 0] = counter & 0xFF;
+
+    for(int i = 0; i< in_len + 4; i++){
+        printf("%02x ", buf[i]);
+    }
+    printf("\n\n");
     
-    int rtn = blake2b512(out_buf, BLAKE2B_OUTBYTES, buf, 4);
+    int rtn = blake2b512(out_buf, BLAKE2B_OUTBYTES, buf, in_len + 4);
+
+    free(buf);
 
     __syncthreads();
 
@@ -39,10 +50,27 @@ __global__ void polynomial_kernel(uint16_t blake2_idx, uint8_t *out){
 RustError polynomial_invoke(size_t degree){
     uint8_t * data;
     uint8_t * d_data;
+    uint8_t hash_in[32] = {
+        0xEB, 0x89, 0x62, 0x73, 0x02, 0x7B, 0xCF, 0xCA, 0xE1, 0x98, 
+        0x20, 0x40, 0x8C, 0x62, 0x5C, 0x49, 0x19, 0xF6, 0x90, 0x97, 
+        0x58, 0x5E, 0x3A, 0x14, 0x66, 0x42, 0x49, 0x08, 0xA4, 0xA6, 
+        0x3C, 0x4E 
+    };
+    uint16_t hash_in_len = 32;
+    uint8_t * d_hash_in;
+
     cudaMallocHost(&data , BLAKE2B_OUTBYTES * 16);
     cudaMalloc(&d_data , BLAKE2B_OUTBYTES * 16);
+    cudaMalloc(&d_hash_in, 32);
 
-    polynomial_kernel<<<1,16>>>(0, d_data);
+    for(int i =0; i< hash_in_len; i++){
+        printf("%02x ", hash_in[i]);
+    }
+    printf("\n");
+
+    cudaMemcpy(d_hash_in, hash_in, 32, cudaMemcpyHostToDevice);
+
+    polynomial_kernel<<<1,16>>>(0, d_hash_in, hash_in_len ,d_data);
 
     cudaMemcpy(data , d_data, BLAKE2B_OUTBYTES * 16, cudaMemcpyDeviceToHost);
 
