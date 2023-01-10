@@ -12,6 +12,7 @@
 #include <stdio.h>
 
 #include "./blake2b.cuh"
+#include "./field.cuh"
 
 
 __global__ void polynomial_kernel(uint16_t blake2_idx, uint8_t* in, uint16_t in_len,  uint8_t *out, scalar_t *scalars){
@@ -36,21 +37,23 @@ __global__ void polynomial_kernel(uint16_t blake2_idx, uint8_t* in, uint16_t in_
         printf("%02x ", buf[i]);
     }
     printf("\n\n");
+
+    // printf("scalar_t size: %d\n", scalar_t::nbits);
     
     int rtn = blake2b512(out_buf, BLAKE2B_OUTBYTES, buf, in_len + 4);
 
     free(buf);
 
     // hash out is in out_buf, 64 bytes [],
-
+    // from_bytes_le_mod_order(scalar, out_buf, BLAKE2B_OUTBYTES);
 
 
     __syncthreads();
 
-    printf("%4d: %d\n", idx, rtn);
-    for( int i=0; i< BLAKE2B_OUTBYTES; i++){
-        printf("%02X", out_buf[i]);
-    }
+    // printf("%4d: %d\n", idx, rtn);
+    // for( int i=0; i< BLAKE2B_OUTBYTES; i++){
+    //     printf("%02X", out_buf[i]);
+    // }
 }
 RustError polynomial_invoke(size_t degree){
     uint8_t * data;
