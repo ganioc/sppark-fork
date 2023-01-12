@@ -40,7 +40,8 @@ __device__ void from_bytes_le_mod_order(scalar_t *scalar, uint8_t *buf, uint16_t
 
     // Guaranteed to not be None, as the input is less than the modulus size.
     // from_random_bytes
-    
+    fr_t a;
+    printf("fr_t len(): %d\n", a.len());
     
 
 }

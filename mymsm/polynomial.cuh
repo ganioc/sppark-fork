@@ -52,7 +52,7 @@ __global__ void polynomial_kernel(uint16_t blake2_idx, uint8_t* in, uint16_t in_
     free(buf);
 
     // hash out is in out_buf, BLAKE2B_OUTBYTES bytes [],
-    // from_bytes_le_mod_order(scalar, out_buf, BLAKE2B_OUTBYTES);
+    from_bytes_le_mod_order(scalar, out_buf, BLAKE2B_OUTBYTES);
 
 
     __syncthreads();
