@@ -108,7 +108,8 @@ __global__ void msm_kernel(bucket_t *d_buckets,affine_t *d_points,scalar_t *d_sc
     
 
 }
-#endif
+
+#else
 
 
 cudaDeviceProp prop;
@@ -189,7 +190,7 @@ static RustError mymsm_pippenger(
                 prop.major >= 7) 
     {
         printf("read GPU property succeed\n");
-        printf("sm count:%ld\n", prop.multiProcessorCount);
+        printf("sm count:%d\n", prop.multiProcessorCount);
     }
     N = (32*256) / (NTHREADS*NWINS);
     printf("N :%ld\n", N); // N is 1,
@@ -205,7 +206,7 @@ static RustError mymsm_pippenger(
     // return RustError{cudaSuccess};
 }
 
-
+#endif
 
 #endif
 

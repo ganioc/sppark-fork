@@ -11,15 +11,15 @@
 
 #include <stdio.h>
 
-
+#include "./blake2b.cuh"
+#include "./field.cuh"
 
 
 __global__ void polynomial_kernel(uint16_t blake2_idx, uint8_t* in, uint16_t in_len,  uint8_t *out, scalar_t *scalars);
 
 #ifdef __CUDA_ARCH__
 
-#include "blake2b.cuh"
-#include "field.cuh"
+
 
 
 __global__ void polynomial_kernel(uint16_t blake2_idx, uint8_t* in, uint16_t in_len,  uint8_t *out, scalar_t *scalars){
@@ -63,7 +63,7 @@ __global__ void polynomial_kernel(uint16_t blake2_idx, uint8_t* in, uint16_t in_
     // }
 }
 
-#endif
+#else
 
 
 RustError polynomial_invoke(size_t degree){
@@ -118,7 +118,7 @@ static RustError mymsm_polynomial(size_t degree){
 
     return polynomial_invoke(degree);
 }
-
+#endif
 
 #endif
 

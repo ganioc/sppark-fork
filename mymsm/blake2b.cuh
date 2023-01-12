@@ -15,40 +15,11 @@ enum blake2b_constant
 };
 
 
-
-
 #define BLAKE2_PACKED(x) x __attribute__((packed))
 #define BLAKE2_INLINE inline
 
 #define NATIVE_LITTLE_ENDIAN
 
-#define G(r, i, a, b, c, d)                     \
-  do                                            \
-  {                                             \
-    a = a + b + m[blake2b_sigma[r][2 * i + 0]]; \
-    d = rotr64(d ^ a, 32);                      \
-    c = c + d;                                  \
-    b = rotr64(b ^ c, 24);                      \
-    a = a + b + m[blake2b_sigma[r][2 * i + 1]]; \
-    d = rotr64(d ^ a, 16);                      \
-    c = c + d;                                  \
-    b = rotr64(b ^ c, 63);                      \
-  } while (0)
-
-#define ROUND(r)                       \
-  do                                   \
-  {                                    \
-    G(r, 0, v[0], v[4], v[8], v[12]);  \
-    G(r, 1, v[1], v[5], v[9], v[13]);  \
-    G(r, 2, v[2], v[6], v[10], v[14]); \
-    G(r, 3, v[3], v[7], v[11], v[15]); \
-    G(r, 4, v[0], v[5], v[10], v[15]); \
-    G(r, 5, v[1], v[6], v[11], v[12]); \
-    G(r, 6, v[2], v[7], v[8], v[13]);  \
-    G(r, 7, v[3], v[4], v[9], v[14]);  \
-  } while (0)
-
-  #ifdef __CUDA_ARCH__
 
 typedef struct blake2b_state__
 {
@@ -80,7 +51,36 @@ typedef struct blake2b_param__ blake2b_param;
 
 
 
-__device__ uint64_t blake2b_IV[8] =
+
+#define G(r, i, a, b, c, d)                     \
+  do                                            \
+  {                                             \
+    a = a + b + m[blake2b_sigma[r][2 * i + 0]]; \
+    d = rotr64(d ^ a, 32);                      \
+    c = c + d;                                  \
+    b = rotr64(b ^ c, 24);                      \
+    a = a + b + m[blake2b_sigma[r][2 * i + 1]]; \
+    d = rotr64(d ^ a, 16);                      \
+    c = c + d;                                  \
+    b = rotr64(b ^ c, 63);                      \
+  } while (0)
+
+#define ROUND(r)                       \
+  do                                   \
+  {                                    \
+    G(r, 0, v[0], v[4], v[8], v[12]);  \
+    G(r, 1, v[1], v[5], v[9], v[13]);  \
+    G(r, 2, v[2], v[6], v[10], v[14]); \
+    G(r, 3, v[3], v[7], v[11], v[15]); \
+    G(r, 4, v[0], v[5], v[10], v[15]); \
+    G(r, 5, v[1], v[6], v[11], v[12]); \
+    G(r, 6, v[2], v[7], v[8], v[13]);  \
+    G(r, 7, v[3], v[4], v[9], v[14]);  \
+  } while (0)
+
+
+
+__device__  __constant__ uint64_t blake2b_IV[8] =
     {
         0x6a09e667f3bcc908ULL, 0xbb67ae8584caa73bULL,
         0x3c6ef372fe94f82bULL, 0xa54ff53a5f1d36f1ULL,
@@ -162,9 +162,6 @@ __device__  uint64_t rotr64(const uint64_t w, const unsigned c)
 {
   return (w >> c) | (w << (64 - c));
 }
-
-
-
 
 __device__ void blake2b_increment_counter(blake2b_state *S, const uint64_t inc)
 {
@@ -388,7 +385,7 @@ __device__ int blake2b(void *out, size_t outlen, const void *in, size_t inlen, c
 __device__ int blake2b512(uint8_t *out, uint16_t len, uint8_t * in, uint16_t in_len){
     return blake2b(out, len, in, in_len, NULL, 0);
 }
-#endif
+
 
 #endif
 
