@@ -5,6 +5,17 @@
 #include <stdint.h>
 #include <string.h>
 
+enum blake2b_constant
+{
+  BLAKE2B_BLOCKBYTES = 128,
+  BLAKE2B_OUTBYTES = 64,
+  BLAKE2B_KEYBYTES = 64,
+  BLAKE2B_SALTBYTES = 16,
+  BLAKE2B_PERSONALBYTES = 16
+};
+
+
+
 
 #define BLAKE2_PACKED(x) x __attribute__((packed))
 #define BLAKE2_INLINE inline
@@ -36,6 +47,38 @@
     G(r, 6, v[2], v[7], v[8], v[13]);  \
     G(r, 7, v[3], v[4], v[9], v[14]);  \
   } while (0)
+
+  #ifdef __CUDA_ARCH__
+
+typedef struct blake2b_state__
+{
+  uint64_t h[8];
+  uint64_t t[2];
+  uint64_t f[2];
+  uint8_t buf[BLAKE2B_BLOCKBYTES];
+  size_t buflen;
+  size_t outlen;
+  uint8_t last_node;
+} blake2b_state;
+
+BLAKE2_PACKED(struct blake2b_param__ {
+  uint8_t digest_length;                   /* 1 */
+  uint8_t key_length;                      /* 2 */
+  uint8_t fanout;                          /* 3 */
+  uint8_t depth;                           /* 4 */
+  uint32_t leaf_length;                    /* 8 */
+  uint32_t node_offset;                    /* 12 */
+  uint32_t xof_length;                     /* 16 */
+  uint8_t node_depth;                      /* 17 */
+  uint8_t inner_length;                    /* 18 */
+  uint8_t reserved[14];                    /* 32 */
+  uint8_t salt[BLAKE2B_SALTBYTES];         /* 48 */
+  uint8_t personal[BLAKE2B_PERSONALBYTES]; /* 64 */
+});
+
+typedef struct blake2b_param__ blake2b_param;
+
+
 
 __device__ uint64_t blake2b_IV[8] =
     {
@@ -121,41 +164,7 @@ __device__  uint64_t rotr64(const uint64_t w, const unsigned c)
 }
 
 
-enum blake2b_constant
-{
-  BLAKE2B_BLOCKBYTES = 128,
-  BLAKE2B_OUTBYTES = 64,
-  BLAKE2B_KEYBYTES = 64,
-  BLAKE2B_SALTBYTES = 16,
-  BLAKE2B_PERSONALBYTES = 16
-};
-typedef struct blake2b_state__
-{
-  uint64_t h[8];
-  uint64_t t[2];
-  uint64_t f[2];
-  uint8_t buf[BLAKE2B_BLOCKBYTES];
-  size_t buflen;
-  size_t outlen;
-  uint8_t last_node;
-} blake2b_state;
 
-BLAKE2_PACKED(struct blake2b_param__ {
-  uint8_t digest_length;                   /* 1 */
-  uint8_t key_length;                      /* 2 */
-  uint8_t fanout;                          /* 3 */
-  uint8_t depth;                           /* 4 */
-  uint32_t leaf_length;                    /* 8 */
-  uint32_t node_offset;                    /* 12 */
-  uint32_t xof_length;                     /* 16 */
-  uint8_t node_depth;                      /* 17 */
-  uint8_t inner_length;                    /* 18 */
-  uint8_t reserved[14];                    /* 32 */
-  uint8_t salt[BLAKE2B_SALTBYTES];         /* 48 */
-  uint8_t personal[BLAKE2B_PERSONALBYTES]; /* 64 */
-});
-
-typedef struct blake2b_param__ blake2b_param;
 
 __device__ void blake2b_increment_counter(blake2b_state *S, const uint64_t inc)
 {
@@ -379,7 +388,7 @@ __device__ int blake2b(void *out, size_t outlen, const void *in, size_t inlen, c
 __device__ int blake2b512(uint8_t *out, uint16_t len, uint8_t * in, uint16_t in_len){
     return blake2b(out, len, in, in_len, NULL, 0);
 }
-
+#endif
 
 #endif
 

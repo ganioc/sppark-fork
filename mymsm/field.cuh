@@ -10,6 +10,8 @@
 #define U64_LIMBS                    4
 
 
+#ifdef __CUDA_ARCH__
+
 __device__ void reverse(uint8_t * buf, uint16_t len){
     uint8_t temp;
     for(int i = 0; i<len/2; i++){
@@ -42,7 +44,7 @@ __device__ void from_bytes_le_mod_order(scalar_t *scalar, uint8_t *buf, uint16_t
     
 
 }
-
+#endif
 
 #endif
 

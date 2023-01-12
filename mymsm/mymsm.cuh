@@ -17,6 +17,11 @@
 #define WBITS     11 // Suitable for ~2^16
 #define NWINS     23
 
+
+__global__ void msm_kernel(bucket_t *d_buckets,affine_t *d_points,scalar_t *d_scalars);
+
+#ifdef __CUDA_ARCH__
+
 /* 
  * off, index of bits(11), 0~22,
  */
@@ -103,6 +108,8 @@ __global__ void msm_kernel(bucket_t *d_buckets,affine_t *d_points,scalar_t *d_sc
     
 
 }
+#endif
+
 
 cudaDeviceProp prop;
 size_t N;

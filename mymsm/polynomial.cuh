@@ -11,8 +11,15 @@
 
 #include <stdio.h>
 
-#include "./blake2b.cuh"
-#include "./field.cuh"
+
+
+
+__global__ void polynomial_kernel(uint16_t blake2_idx, uint8_t* in, uint16_t in_len,  uint8_t *out, scalar_t *scalars);
+
+#ifdef __CUDA_ARCH__
+
+#include "blake2b.cuh"
+#include "field.cuh"
 
 
 __global__ void polynomial_kernel(uint16_t blake2_idx, uint8_t* in, uint16_t in_len,  uint8_t *out, scalar_t *scalars){
@@ -21,7 +28,7 @@ __global__ void polynomial_kernel(uint16_t blake2_idx, uint8_t* in, uint16_t in_
     uint16_t idx =  threadIdx.x + blockIdx.x * blockDim.x;
     uint16_t counter =  idx + blake2_idx;
     uint8_t *buf = (uint8_t *)malloc(in_len + 4);
-    uint8_t *out_buf = out + idx * BLAKE2B_OUTBYTES;
+    uint8_t *out_buf = out + idx * 64;
     scalar_t *scalar = scalars + idx;
 
     for(int i=0; i< in_len; i++){
@@ -44,7 +51,7 @@ __global__ void polynomial_kernel(uint16_t blake2_idx, uint8_t* in, uint16_t in_
 
     free(buf);
 
-    // hash out is in out_buf, 64 bytes [],
+    // hash out is in out_buf, BLAKE2B_OUTBYTES bytes [],
     // from_bytes_le_mod_order(scalar, out_buf, BLAKE2B_OUTBYTES);
 
 
@@ -55,6 +62,10 @@ __global__ void polynomial_kernel(uint16_t blake2_idx, uint8_t* in, uint16_t in_
     //     printf("%02X", out_buf[i]);
     // }
 }
+
+#endif
+
+
 RustError polynomial_invoke(size_t degree){
     uint8_t * data;
     uint8_t * d_data;
@@ -68,8 +79,8 @@ RustError polynomial_invoke(size_t degree){
     uint8_t * d_hash_in;
     scalar_t * d_scalars;
 
-    cudaMallocHost(&data , BLAKE2B_OUTBYTES * 16);
-    cudaMalloc(&d_data , BLAKE2B_OUTBYTES * 16);
+    cudaMallocHost(&data , 64 * 16);
+    cudaMalloc(&d_data , 64 * 16);
     cudaMalloc(&d_hash_in, 32);
     cudaMalloc(&d_scalars , sizeof(scalar_t) * 16);
 
@@ -82,13 +93,13 @@ RustError polynomial_invoke(size_t degree){
 
     polynomial_kernel<<<1,16>>>(0, d_hash_in, hash_in_len ,d_data, d_scalars);
 
-    cudaMemcpy(data , d_data, BLAKE2B_OUTBYTES * 16, cudaMemcpyDeviceToHost);
+    cudaMemcpy(data , d_data, 64 * 16, cudaMemcpyDeviceToHost);
 
     printf("\nResult:\n");
     for(int i=0; i< 16; i++){
         printf("(%d)\n", i);
-        for(int j = 0; j < BLAKE2B_OUTBYTES; j++){
-            printf("%02X", data[ i* BLAKE2B_OUTBYTES + j]);
+        for(int j = 0; j < 64; j++){
+            printf("%02X", data[ i* 64 + j]);
         }
         printf("\n");
     }
