@@ -8,9 +8,23 @@
 #define NUM_MODULUS_BYTES_MINUS_ONE  31
 //#define u64_limbs
 #define U64_LIMBS                    4
-
+#define RESULT_SIZE                  (U64_LIMBS * 8 + 1)
 
 #ifdef __CUDA_ARCH__
+
+__device__ void PRINT(uint8_t *buf, uint16_t len){
+    char * hex = "0123456789ABCDEF";
+    char * str_ptr = (char*)malloc(len*3 + 1);
+    for(int i=0; i< len; i++){
+        str_ptr[i*3 + 0] = hex[ buf[i] >> 4 & 0xF  ];
+        str_ptr[i*3 + 1] = hex[ buf[i] & 0xF];
+        str_ptr[i*3 + 2] = ' ';
+    }
+    str_ptr[len*3 + 1] = 0;
+    printf("%s\n", str_ptr);
+
+    free(str_ptr);
+}
 
 __device__ void reverse(uint8_t * buf, uint16_t len){
     uint8_t temp;
@@ -26,42 +40,86 @@ __device__ fr_t byte_to_fr_t(uint32_t a){
     p[0] = a;
     return fr_t(p);
 }
+__device__ fr_t from_random_bytes(uint8_t * buf, uint16_t len){
+    uint8_t result_bytes[RESULT_SIZE]={0};
+    uint32_t fr_t_arr[8];
+
+    for(int i=0; i< len; i++){
+        result_bytes[i] = buf[i];
+    }
+    result_bytes[len] = 0;
+    for(int i=0; i< 32; i++){
+        printf("%02x ", result_bytes[i]);
+    }
+
+    fr_t_arr[0] = (uint32_t)result_bytes[3]<<24 | (uint32_t)result_bytes[2] << 16 |
+                (uint32_t)result_bytes[1] << 8  | (uint32_t)result_bytes[0];
+    fr_t_arr[1] = (uint32_t)result_bytes[7]<<24 | (uint32_t)result_bytes[6] << 16 |
+                (uint32_t)result_bytes[5] << 8  | (uint32_t)result_bytes[4];
+    fr_t_arr[2] = (uint32_t)result_bytes[11]<<24 | (uint32_t)result_bytes[10] << 16 |
+                (uint32_t)result_bytes[9] << 8  | (uint32_t)result_bytes[8];
+    fr_t_arr[3] = (uint32_t)result_bytes[15]<<24 | (uint32_t)result_bytes[14] << 16 |
+                (uint32_t)result_bytes[13] << 8  | (uint32_t)result_bytes[12];
+    fr_t_arr[4] = (uint32_t)result_bytes[19]<<24 | (uint32_t)result_bytes[18] << 16 |
+                (uint32_t)result_bytes[17] << 8  | (uint32_t)result_bytes[16];
+    fr_t_arr[5] = (uint32_t)result_bytes[23]<<24 | (uint32_t)result_bytes[22] << 16 |
+                (uint32_t)result_bytes[21] << 8  | (uint32_t)result_bytes[20];
+    fr_t_arr[6] = (uint32_t)result_bytes[27]<<24 | (uint32_t)result_bytes[26] << 16 |
+                (uint32_t)result_bytes[25] << 8  | (uint32_t)result_bytes[24];
+    fr_t_arr[7] = (uint32_t)result_bytes[31]<<24 | (uint32_t)result_bytes[30] << 16 |
+                (uint32_t)result_bytes[29] << 8  | (uint32_t)result_bytes[28];
+
+    return fr_t(fr_t_arr);
+}
 __device__ void from_bytes_le_mod_order(scalar_t *scalar, uint8_t *buf, uint16_t len){
-    uint8_t * leading_bytes;
+    uint8_t * leading_bytes, *bytes_to_directly_convert;
     uint8_t * remaining_bytes;
+    int num_bytes_to_directly_convert, num_remaining_bytes;
     // reverse array buf,
     reverse(buf, len);
 
     // from_bytes_be_mod_order()
-    int num_bytes_to_directly_convert = min(NUM_MODULUS_BYTES_MINUS_ONE, len);
-    leading_bytes = buf;
+    // int num_bytes_to_directly_convert = min(NUM_MODULUS_BYTES_MINUS_ONE, len);
+    num_bytes_to_directly_convert = NUM_MODULUS_BYTES_MINUS_ONE;
+    num_remaining_bytes = len - num_bytes_to_directly_convert;
+
+    bytes_to_directly_convert = leading_bytes = buf;
     remaining_bytes = buf + num_bytes_to_directly_convert;
 
     // Copy the leading big-endian bytes directly into a field element.
     // The number of bytes directly converted must be less than the
     // number of bytes needed to represent the modulus, as we must begin
     // modular reduction once the data is of the same number of bytes as the modulus.
-    reverse(leading_bytes, num_bytes_to_directly_convert);
+    reverse(bytes_to_directly_convert, num_bytes_to_directly_convert);
 
     // Guaranteed to not be None, as the input is less than the modulus size.
     // from_random_bytes
-    fr_t a = fr_t::one();
-    printf("fr_t len(): %d\n", a.len());
-    printf("one %08x %08x %08x %08x %08x %08x %08x %08x\n",
-        a[0], a[1],a[2],a[3],a[4],a[5],a[6],a[7]
-    );
-    // uint32_t p[8] = {0x00000002, 0x00000000, 0x00000000, 0x00000000, 
-    //     0x00000000, 0x00000000, 0x00000000, 0x00000000};
-    fr_t b = byte_to_fr_t(16);
-    printf("b %08x %08x %08x %08x %08x %08x %08x %08x\n",
-    b[0], b[1],b[2],b[3],b[4],b[5],b[6],b[7]);
+    fr_t res = from_random_bytes(bytes_to_directly_convert, num_bytes_to_directly_convert);
 
-    // b::from();
-    a = a*b;
-    a = a+b;
-    printf("a.after calc:  %08x %08x %08x %08x %08x %08x %08x %08x\n",
-    a[0], a[1],a[2],a[3],a[4],a[5],a[6],a[7]);    
+    // fr_t a = fr_t::one();
+    // printf("fr_t len(): %d\n", a.len());
+    // printf("one %08x %08x %08x %08x %08x %08x %08x %08x\n",
+    //     a[0], a[1],a[2],a[3],a[4],a[5],a[6],a[7]
+    // );
 
+    // fr_t b = byte_to_fr_t(16);
+    // printf("b %08x %08x %08x %08x %08x %08x %08x %08x\n",
+    // b[0], b[1],b[2],b[3],b[4],b[5],b[6],b[7]);
+
+    // // b::from();
+    // a = a*b;
+    // a = a+b;
+    // printf("a.after calc:  %08x %08x %08x %08x %08x %08x %08x %08x\n",
+    // a[0], a[1],a[2],a[3],a[4],a[5],a[6],a[7]);  
+    
+    fr_t window_size = byte_to_fr_t(256);
+
+    for(int i = 0; i < num_remaining_bytes; i++){
+        res *= window_size;
+        res = res + byte_to_fr_t(remaining_bytes[i]);
+    }
+
+    *scalar = res;
 }
 #endif
 

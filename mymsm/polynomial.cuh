@@ -40,14 +40,18 @@ __global__ void polynomial_kernel(uint16_t blake2_idx, uint8_t* in, uint16_t in_
     buf[in_len + 1] = counter >> 8 & 0xFF;
     buf[in_len + 0] = counter & 0xFF;
 
-    for(int i = 0; i< in_len + 4; i++){
-        printf("%02x ", buf[i]);
-    }
+    // for(int i = 0; i< in_len + 4; i++){
+    //     printf("%02x ", buf[i]);
+    // }
+    PRINT(buf, in_len + 4);
+
     printf("\n\n");
 
     // printf("scalar_t size: %d\n", scalar_t::nbits);
     
     int rtn = blake2b512(out_buf, BLAKE2B_OUTBYTES, buf, in_len + 4);
+
+    PRINT(out_buf, BLAKE2B_OUTBYTES);
 
     free(buf);
 
@@ -95,14 +99,14 @@ RustError polynomial_invoke(size_t degree){
 
     cudaMemcpy(data , d_data, 64 * 16, cudaMemcpyDeviceToHost);
 
-    printf("\nResult:\n");
-    for(int i=0; i< 16; i++){
-        printf("(%d)\n", i);
-        for(int j = 0; j < 64; j++){
-            printf("%02X", data[ i* 64 + j]);
-        }
-        printf("\n");
-    }
+    // printf("\nResult:\n");
+    // for(int i=0; i< 16; i++){
+    //     printf("(%d)\n", i);
+    //     for(int j = 0; j < 64; j++){
+    //         printf("%02X", data[ i* 64 + j]);
+    //     }
+    //     printf("\n");
+    // }
 
 
     cudaFree( d_data);
