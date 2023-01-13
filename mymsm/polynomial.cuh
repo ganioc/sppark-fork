@@ -14,6 +14,8 @@
 #include "./blake2b.cuh"
 #include "./field.cuh"
 
+#define N  4
+
 
 __global__ void polynomial_kernel(uint16_t blake2_idx, uint8_t* in, uint16_t in_len,  uint8_t *out, scalar_t *scalars);
 
@@ -83,10 +85,10 @@ RustError polynomial_invoke(size_t degree){
     uint8_t * d_hash_in;
     scalar_t * d_scalars;
 
-    cudaMallocHost(&data , 64 * 16);
-    cudaMalloc(&d_data , 64 * 16);
+    cudaMallocHost(&data , 64 * N);
+    cudaMalloc(&d_data , 64 * N);
     cudaMalloc(&d_hash_in, 32);
-    cudaMalloc(&d_scalars , sizeof(scalar_t) * 16);
+    cudaMalloc(&d_scalars , sizeof(scalar_t) * N);
 
     for(int i =0; i< hash_in_len; i++){
         printf("%02x ", hash_in[i]);
@@ -95,9 +97,9 @@ RustError polynomial_invoke(size_t degree){
 
     cudaMemcpy(d_hash_in, hash_in, 32, cudaMemcpyHostToDevice);
 
-    polynomial_kernel<<<1,16>>>(0, d_hash_in, hash_in_len ,d_data, d_scalars);
+    polynomial_kernel<<<1,N>>>(0, d_hash_in, hash_in_len ,d_data, d_scalars);
 
-    cudaMemcpy(data , d_data, 64 * 16, cudaMemcpyDeviceToHost);
+    cudaMemcpy(data , d_data, 64 * N, cudaMemcpyDeviceToHost);
 
     // printf("\nResult:\n");
     // for(int i=0; i< 16; i++){

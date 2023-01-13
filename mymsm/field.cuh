@@ -20,7 +20,7 @@ __device__ void PRINT(uint8_t *buf, uint16_t len){
         str_ptr[i*3 + 1] = hex[ buf[i] & 0xF];
         str_ptr[i*3 + 2] = ' ';
     }
-    str_ptr[len*3 + 1] = 0;
+    str_ptr[len*3] = 0;
     printf("%s\n", str_ptr);
 
     free(str_ptr);
@@ -48,9 +48,10 @@ __device__ fr_t from_random_bytes(uint8_t * buf, uint16_t len){
         result_bytes[i] = buf[i];
     }
     result_bytes[len] = 0;
-    for(int i=0; i< 32; i++){
-        printf("%02x ", result_bytes[i]);
-    }
+    // for(int i=0; i< 32; i++){
+    //     printf("%02x ", result_bytes[i]);
+    // }
+    PRINT(result_bytes, 32);
 
     fr_t_arr[0] = (uint32_t)result_bytes[3]<<24 | (uint32_t)result_bytes[2] << 16 |
                 (uint32_t)result_bytes[1] << 8  | (uint32_t)result_bytes[0];
@@ -95,29 +96,25 @@ __device__ void from_bytes_le_mod_order(scalar_t *scalar, uint8_t *buf, uint16_t
     // Guaranteed to not be None, as the input is less than the modulus size.
     // from_random_bytes
     fr_t res = from_random_bytes(bytes_to_directly_convert, num_bytes_to_directly_convert);
+    printf("fr_t len(): %d\n", res.len());
+    printf("res %08X %08X %08X %08X %08X %08X %08X %08X\n",
+        res[0], res[1],res[2],res[3],res[4],res[5],res[6],res[7]
+    );
 
-    // fr_t a = fr_t::one();
-    // printf("fr_t len(): %d\n", a.len());
-    // printf("one %08x %08x %08x %08x %08x %08x %08x %08x\n",
-    //     a[0], a[1],a[2],a[3],a[4],a[5],a[6],a[7]
-    // );
-
-    // fr_t b = byte_to_fr_t(16);
-    // printf("b %08x %08x %08x %08x %08x %08x %08x %08x\n",
-    // b[0], b[1],b[2],b[3],b[4],b[5],b[6],b[7]);
-
-    // // b::from();
-    // a = a*b;
-    // a = a+b;
-    // printf("a.after calc:  %08x %08x %08x %08x %08x %08x %08x %08x\n",
-    // a[0], a[1],a[2],a[3],a[4],a[5],a[6],a[7]);  
+    PRINT(remaining_bytes, num_remaining_bytes);
     
     fr_t window_size = byte_to_fr_t(256);
+    printf("window_size in fr_t: %08X %08X %08X %08X %08X %08X %08X %08X\n",
+    window_size[0], window_size[1],window_size[2],window_size[3],window_size[4],window_size[5],window_size[6],window_size[7]
+    );
 
     for(int i = 0; i < num_remaining_bytes; i++){
-        res *= window_size;
+        res = res * window_size;
         res = res + byte_to_fr_t(remaining_bytes[i]);
     }
+    printf("res after: %08X %08X %08X %08X %08X %08X %08X %08X\n",
+        res[0], res[1],res[2],res[3],res[4],res[5],res[6],res[7]
+    );
 
     *scalar = res;
 }
