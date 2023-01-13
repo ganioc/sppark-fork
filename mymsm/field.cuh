@@ -20,7 +20,12 @@ __device__ void reverse(uint8_t * buf, uint16_t len){
         buf[len-i-1] = temp;
     } 
 }
-
+__device__ fr_t byte_to_fr_t(uint32_t a){
+    uint32_t p[8] = {0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+        0x00000000, 0x00000000, 0x00000000, 0x00000000};
+    p[0] = a;
+    return fr_t(p);
+}
 __device__ void from_bytes_le_mod_order(scalar_t *scalar, uint8_t *buf, uint16_t len){
     uint8_t * leading_bytes;
     uint8_t * remaining_bytes;
@@ -45,7 +50,17 @@ __device__ void from_bytes_le_mod_order(scalar_t *scalar, uint8_t *buf, uint16_t
     printf("one %08x %08x %08x %08x %08x %08x %08x %08x\n",
         a[0], a[1],a[2],a[3],a[4],a[5],a[6],a[7]
     );
-    
+    // uint32_t p[8] = {0x00000002, 0x00000000, 0x00000000, 0x00000000, 
+    //     0x00000000, 0x00000000, 0x00000000, 0x00000000};
+    fr_t b = byte_to_fr_t(16);
+    printf("b %08x %08x %08x %08x %08x %08x %08x %08x\n",
+    b[0], b[1],b[2],b[3],b[4],b[5],b[6],b[7]);
+
+    // b::from();
+    a = a*b;
+    a = a+b;
+    printf("a.after calc:  %08x %08x %08x %08x %08x %08x %08x %08x\n",
+    a[0], a[1],a[2],a[3],a[4],a[5],a[6],a[7]);    
 
 }
 #endif
