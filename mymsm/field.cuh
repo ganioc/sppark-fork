@@ -40,6 +40,9 @@ __device__ fr_t byte_to_fr_t(uint32_t a){
     p[0] = a;
     return fr_t(p);
 }
+__device__ fr_t create_fr_t(uint32_t * a){
+    return fr_t(a);
+}
 __device__ fr_t from_random_bytes(uint8_t * buf, uint16_t len){
     uint8_t result_bytes[RESULT_SIZE]={0};
     uint32_t fr_t_arr[8];
@@ -103,9 +106,32 @@ __device__ void from_bytes_le_mod_order(scalar_t *scalar, uint8_t *buf, uint16_t
 
     PRINT(remaining_bytes, num_remaining_bytes);
     
-    fr_t window_size = byte_to_fr_t(256);
+    // fr_t window_size = byte_to_fr_t(1);
+    uint32_t a[8] = {1,0,0,0,0,0,0,0};
+    fr_t window_size = create_fr_t(a);
     printf("window_size in fr_t: %08X %08X %08X %08X %08X %08X %08X %08X\n",
     window_size[0], window_size[1],window_size[2],window_size[3],window_size[4],window_size[5],window_size[6],window_size[7]
+    );
+    // window_size.from();
+    // printf("window_size in fr_t after from: %08X %08X %08X %08X %08X %08X %08X %08X\n",
+    // window_size[0], window_size[1],window_size[2],window_size[3],window_size[4],window_size[5],window_size[6],window_size[7]
+    // );
+
+    // fr_t f_one = fr_t::one();
+    // printf("one in fr_t: %08X %08X %08X %08X %08X %08X %08X %08X\n",
+    // f_one[0], f_one[1],f_one[2],f_one[3],f_one[4],f_one[5],f_one[6],f_one[7]
+    // );
+    uint32_t a2[8] = {256,0,0,0,0,0,0,0};
+    fr_t  fp2 = create_fr_t(a2);
+
+    fr_t mul = window_size * fp2;
+
+    printf("mul in fr_t: %08X %08X %08X %08X %08X %08X %08X %08X\n",
+    mul[0], mul[1],mul[2],mul[3],mul[4],mul[5],mul[6],mul[7]
+    );
+    mul.to();
+    printf("mul in fr_t after to(): %08X %08X %08X %08X %08X %08X %08X %08X\n",
+    mul[0], mul[1],mul[2],mul[3],mul[4],mul[5],mul[6],mul[7]
     );
 
     for(int i = 0; i < num_remaining_bytes; i++){

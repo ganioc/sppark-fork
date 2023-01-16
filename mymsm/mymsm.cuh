@@ -46,6 +46,7 @@ static __device__ int get_wval(const scalar_t& d, uint32_t off, uint32_t bits)
         ret = (uint64_t)d[head_block] << 32 | d[tail_block];
     }
 
+
     return (int)(ret >> ((off*bits)%32)) & ((1 << bits) -1);
 
     // return d[top/32];
@@ -73,7 +74,11 @@ __global__ void msm_kernel(bucket_t *d_buckets,affine_t *d_points,scalar_t *d_sc
     // printf("scalar len: %d\n", scalar.len());
     int wval = -1;
     wval = get_wval(scalar, idx, 11);
-    printf("%d wval %0x\n", idx, wval);
+    printf("scalar len: %d\n", scalar.len());
+    printf("scalar, %08X %08X %08X %08X %08X %08X %08X %08X\n", 
+        scalar[0], scalar[1], scalar[2], scalar[3],
+        scalar[4], scalar[5], scalar[6], scalar[7]);
+    printf("%d wval %03X\n", idx, wval);
     
     // clear all buckets to be zero,
     for(int i =0; i < (1 << WBITS); i++){
@@ -195,6 +200,10 @@ static RustError mymsm_pippenger(
     N = (32*256) / (NTHREADS*NWINS);
     printf("N :%ld\n", N); // N is 1,
     printf("sizeof size_t:%ld\n", sizeof(size_t));
+
+    // printf("scalar : %0X", scalars[0][0]);
+
+
 
 
     return invoke(*out, 

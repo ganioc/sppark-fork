@@ -103,10 +103,11 @@ fn mymsm_correctness() {
     ]);
 
     let s = Fr::new(bg1);
+    println!("s: {:?}", s);
 
     // print out the 0xXX content,
     // 1: 0xE678C69107217551
-    // 
+    //
     // 2: 0x7B8CCC90EA6B5757
     // 3: 0xD62C57D4BAF500FF
     // 4: 0xA88710DA31E904D
@@ -145,13 +146,12 @@ fn mymsm_correctness() {
 }
 
 #[test]
-fn test_polynomial(){
+fn test_polynomial() {
     println!("test_polynomial()");
 
     let degree = 2;
 
     mymsm_polynomial_works(degree);
 
-    assert_eq!(1,1);
+    assert_eq!(1, 1);
 }
-
