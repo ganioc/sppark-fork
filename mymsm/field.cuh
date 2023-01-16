@@ -40,9 +40,7 @@ __device__ fr_t byte_to_fr_t(uint32_t a){
     p[0] = a;
     return fr_t(p);
 }
-__device__ fr_t create_fr_t(uint32_t * a){
-    return fr_t(a);
-}
+
 __device__ fr_t from_random_bytes(uint8_t * buf, uint16_t len){
     uint8_t result_bytes[RESULT_SIZE]={0};
     uint32_t fr_t_arr[8];
@@ -51,9 +49,7 @@ __device__ fr_t from_random_bytes(uint8_t * buf, uint16_t len){
         result_bytes[i] = buf[i];
     }
     result_bytes[len] = 0;
-    // for(int i=0; i< 32; i++){
-    //     printf("%02x ", result_bytes[i]);
-    // }
+
     PRINT(result_bytes, 32);
 
     fr_t_arr[0] = (uint32_t)result_bytes[3]<<24 | (uint32_t)result_bytes[2] << 16 |
@@ -108,21 +104,17 @@ __device__ void from_bytes_le_mod_order(scalar_t *scalar, uint8_t *buf, uint16_t
     
     fr_t window_size = byte_to_fr_t(256);
     printf("window_size in fr_t: %08X %08X %08X %08X %08X %08X %08X %08X\n",
-    window_size[0], window_size[1],window_size[2],window_size[3],window_size[4],window_size[5],window_size[6],window_size[7]
+        window_size[0], window_size[1],window_size[2],window_size[3],
+        window_size[4],window_size[5],window_size[6],window_size[7]
     );
 
-    res = res * window_size;
-
-    // for(int i = 0; i < num_remaining_bytes; i++){
-    //     res = res * window_size;
-    //     res = res + byte_to_fr_t(remaining_bytes[i]);
-    // }
+    for(int i = 0; i < num_remaining_bytes; i++){
+        res = res * window_size;
+        res.to(); // must add res.to() after multiply, not for plus, 
+        res = res + byte_to_fr_t(remaining_bytes[i]);
+    }
     printf("res after: %08X %08X %08X %08X %08X %08X %08X %08X\n",
         res[0], res[1],res[2],res[3],res[4],res[5],res[6],res[7]);
-
-    res.to();
-    printf("res after to(): %08X %08X %08X %08X %08X %08X %08X %08X\n",
-    res[0], res[1],res[2],res[3],res[4],res[5],res[6],res[7]);
 
     *scalar = res;
 }

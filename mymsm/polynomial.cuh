@@ -42,14 +42,9 @@ __global__ void polynomial_kernel(uint16_t blake2_idx, uint8_t* in, uint16_t in_
     buf[in_len + 1] = counter >> 8 & 0xFF;
     buf[in_len + 0] = counter & 0xFF;
 
-    // for(int i = 0; i< in_len + 4; i++){
-    //     printf("%02x ", buf[i]);
-    // }
     PRINT(buf, in_len + 4);
 
     printf("\n\n");
-
-    // printf("scalar_t size: %d\n", scalar_t::nbits);
     
     int rtn = blake2b512(out_buf, BLAKE2B_OUTBYTES, buf, in_len + 4);
 
@@ -57,7 +52,7 @@ __global__ void polynomial_kernel(uint16_t blake2_idx, uint8_t* in, uint16_t in_
 
     free(buf);
 
-    // hash out is in out_buf, BLAKE2B_OUTBYTES bytes [],
+    // hash out is in out_buf, BLAKE2B_OUTBYTES bytes [], *scalar has the final result
     from_bytes_le_mod_order(scalar, out_buf, BLAKE2B_OUTBYTES);
 
 
