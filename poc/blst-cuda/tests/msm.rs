@@ -148,6 +148,7 @@ fn mymsm_correctness() {
 #[test]
 fn test_polynomial() {
     println!("test_polynomial()");
+    
 
     let degree = 2;
 
